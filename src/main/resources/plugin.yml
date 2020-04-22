@@ -7,4 +7,4 @@ commands:
   suggest:
     usage: "/suggest <message>"
   view:
-    usage: "/view <-a, id, uuid> (page)"
+    usage: "/view <UUID, ID, -a> (page)"
