@@ -1,0 +1,10 @@
+name: CodingChallenge
+version: ${project.version}
+main: dev.baqel.codingchallenge.CodingChallenge
+authors: [Baqel]
+description: Coding challenge
+commands:
+  suggest:
+    usage: "/suggest <message>"
+  view:
+    usage: "/view <-a, id, uuid> (page)"
