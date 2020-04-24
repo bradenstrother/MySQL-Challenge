@@ -7,9 +7,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
+
 public class ViewCommand implements CommandExecutor {
 
     @Override
@@ -17,11 +16,11 @@ public class ViewCommand implements CommandExecutor {
         if (sender instanceof Player) {
             Player player = (Player) sender;
             if (label.equalsIgnoreCase("view") && player.hasPermission("challenge.view")) {
-                try {
-                    if (args.length == 0) {
-                        player.sendMessage(ChatColor.RED + "Invalid Arguments: (-a, ID, UUID) [page]");
-                        return true;
-                    } else if (args[0].length() == 36) { // UUID
+                if (args.length == 0) {
+                    player.sendMessage(ChatColor.RED + "Invalid Arguments: (-a, ID, UUID) [page]");
+                    return true;
+                } else if (args[0].length() == 36) { // UUID
+                    try {
                         ResultSet rs = CodingChallenge.preparedStatement("SELECT COUNT(UUID) FROM player_info WHERE UUID = '" + args[0] + "';").executeQuery();
                         rs.next();
                         if (rs.getInt(1) == 0) {
@@ -40,51 +39,88 @@ public class ViewCommand implements CommandExecutor {
                                 player.sendMessage(ChatColor.GRAY + "ID: " + ChatColor.GREEN + id + ChatColor.GRAY + " UUID: " + ChatColor.GREEN + Bukkit.getPlayer(java.util.UUID.fromString(UUID)).getDisplayName());
                             }
                         }
-                        return true;
-                    } else if (args[0].equalsIgnoreCase("-a")) { // Suggestions List for Page 2+
-                        if (args.length == 2) {
-                            player.sendMessage(ChatColor.GREEN + "Page: " + args[1]);
-                            for (int i = 1; i <= 10 * Integer.parseInt(args[1]); i++) {
-                                if (Integer.parseInt(args[1]) != 1) {
-                                    ResultSet rs = CodingChallenge.preparedStatement("SELECT COUNT(ID) FROM player_INFO WHERE ID = '" + i + "';").executeQuery();
-                                    rs.next();
-                                    if (!(rs.getInt(1) == 0)) {
-                                        ResultSet result = CodingChallenge.preparedStatement("SELECT * FROM player_info WHERE ID = '" + i + "';").executeQuery();
-                                        result.next();
-                                        int id = result.getInt("ID");
-                                        String UUID = result.getString("UUID");
-                                        if (i >= (10 * Integer.parseInt(args[1])) - 9) {
-                                            player.sendMessage(ChatColor.GRAY + "ID: " + ChatColor.GREEN + id + ChatColor.GRAY + " User: " + ChatColor.GREEN + Bukkit.getPlayer(java.util.UUID.fromString(UUID)).getDisplayName());
-                                        }
-                                    }
-                                } else { // Suggestions List for Page 1
-                                    ResultSet rs = CodingChallenge.preparedStatement("SELECT COUNT(ID) FROM player_INFO WHERE ID = '" + i + "';").executeQuery();
-                                    rs.next();
-                                    if (!(rs.getInt(1) == 0)) {
-                                        ResultSet result = CodingChallenge.preparedStatement("SELECT * FROM player_info WHERE ID = '" + i + "';").executeQuery();
-                                        result.next();
-                                        int id = result.getInt("ID");
-                                        String UUID = result.getString("UUID");
-                                        player.sendMessage(ChatColor.GRAY + "ID: " + ChatColor.GREEN + id + ChatColor.GRAY + " User: " + ChatColor.GREEN + Bukkit.getPlayer(java.util.UUID.fromString(UUID)).getDisplayName());
-                                    }
-                                }
-                            }
-                        } else { // Suggestions List no arguments
-                            player.sendMessage(ChatColor.GREEN + "Page: 1");
-                            for (int i = 1; i <= 10; i++) {
-                                ResultSet rs = CodingChallenge.preparedStatement("SELECT COUNT(ID) FROM player_INFO WHERE ID = '" + i + "';").executeQuery();
-                                rs.next();
-                                if (!(rs.getInt(1) == 0)) {
-                                    ResultSet result = CodingChallenge.preparedStatement("SELECT * FROM player_info WHERE ID = '" + i + "';").executeQuery();
-                                    result.next();
-                                    int id = result.getInt("ID");
-                                    String UUID = result.getString("UUID");
-                                    player.sendMessage(ChatColor.GRAY + "ID: " + ChatColor.GREEN + id + ChatColor.GRAY + " User: " + ChatColor.GREEN + Bukkit.getPlayer(java.util.UUID.fromString(UUID)).getDisplayName());
-                                }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    } finally {
+
+                    }
+                    return true;
+                }
+//                    else if (args[0].equalsIgnoreCase("-a")) { // Suggestions List for Page 2+
+//                        if (args.length == 2) {
+//                            player.sendMessage(ChatColor.GREEN + "Page: " + args[1]);
+//                            for (int i = 1; i <= 10 * Integer.parseInt(args[1]); i++) {
+//                                if (Integer.parseInt(args[1]) != 1) {
+//                                    ResultSet rs = CodingChallenge.preparedStatement("SELECT COUNT(ID) FROM player_INFO WHERE ID = '" + i + "';").executeQuery();
+//                                    rs.next();
+//                                    if (!(rs.getInt(1) == 0)) {
+//                                        ResultSet result = CodingChallenge.preparedStatement("SELECT * FROM player_info WHERE ID = '" + i + "';").executeQuery();
+//                                        result.next();
+//                                        int id = result.getInt("ID");
+//                                        String UUID = result.getString("UUID");
+//                                        if (i >= (10 * Integer.parseInt(args[1])) - 9) {
+//                                            player.sendMessage(ChatColor.GRAY + "ID: " + ChatColor.GREEN + id + ChatColor.GRAY + " User: " + ChatColor.GREEN + Bukkit.getPlayer(java.util.UUID.fromString(UUID)).getDisplayName());
+//                                        }
+//                                    }
+//                                } else { // Suggestions List for Page 1
+//                                    ResultSet rs = CodingChallenge.preparedStatement("SELECT COUNT(ID) FROM player_INFO WHERE ID = '" + i + "';").executeQuery();
+//                                    rs.next();
+//                                    if (!(rs.getInt(1) == 0)) {
+//                                        ResultSet result = CodingChallenge.preparedStatement("SELECT * FROM player_info WHERE ID = '" + i + "';").executeQuery();
+//                                        result.next();
+//                                        int id = result.getInt("ID");
+//                                        String UUID = result.getString("UUID");
+//                                        player.sendMessage(ChatColor.GRAY + "ID: " + ChatColor.GREEN + id + ChatColor.GRAY + " User: " + ChatColor.GREEN + Bukkit.getPlayer(java.util.UUID.fromString(UUID)).getDisplayName());
+//                                    }
+//                                }
+//                            }
+//                        } else { // Suggestions List no arguments
+//                            player.sendMessage(ChatColor.GREEN + "Page: 1");
+//                            for (int i = 1; i <= 10; i++) {
+//                                ResultSet rs = CodingChallenge.preparedStatement("SELECT COUNT(ID) FROM player_INFO WHERE ID = '" + i + "';").executeQuery();
+//                                rs.next();
+//                                if (!(rs.getInt(1) == 0)) {
+//                                    ResultSet result = CodingChallenge.preparedStatement("SELECT * FROM player_info WHERE ID = '" + i + "';").executeQuery();
+//                                    result.next();
+//                                    int id = result.getInt("ID");
+//                                    String UUID = result.getString("UUID");
+//                                    player.sendMessage(ChatColor.GRAY + "ID: " + ChatColor.GREEN + id + ChatColor.GRAY + " User: " + ChatColor.GREEN + Bukkit.getPlayer(java.util.UUID.fromString(UUID)).getDisplayName());
+//                                }
+//                            }
+//                        }
+//                        return true;
+                else if (args.length == 1) { // View Suggestion by ID
+
+                    PreparedStatement info = null;
+                    PreparedStatement count = null;
+
+                    String infoQuery =
+                            "SELECT * FROM player_info" +
+                                    "WHERE ID = ?;";
+                    String countQuery =
+                            "SELECT COUNT(ID) FROM player_info WHERE ID = ?;";
+
+                    try {
+                        CodingChallenge.connection.setAutoCommit(false);
+                        info = CodingChallenge.connection.prepareStatement(infoQuery);
+                        count = CodingChallenge.connection.prepareStatement(countQuery);
+                        info.setString(1, args[0]);
+                        count.setString(1, args[0]);
+                        CodingChallenge.connection.commit();
+                        ResultSet rsCount = count.executeQuery(countQuery);
+                        rsCount.next();
+                        if (rsCount.getInt(1) == 0) {
+                            player.sendMessage(ChatColor.RED + "Suggestion ID not found in database!");
+                        } else {
+                            ResultSet rsInfo = info.executeQuery(infoQuery);
+                            while (rsInfo.next()) {
+                                int id = rsInfo.getInt("ID");
+                                String UUID = rsInfo.getString("UUID");
+                                String Suggestion = rsInfo.getString("MESSAGE");
+                                Timestamp ts = rsInfo.getTimestamp("TIMESTAMP");
                             }
                         }
-                        return true;
-                    } else if (args.length == 1 && !args[0].equalsIgnoreCase("-a")) { // View Suggestion by ID
+
                         ResultSet rs2 = CodingChallenge.preparedStatement("SELECT COUNT(ID) FROM player_info WHERE ID = '" + args[0] + "';").executeQuery();
                         rs2.next();
                         if (rs2.getInt(1) == 0) {
@@ -103,9 +139,29 @@ public class ViewCommand implements CommandExecutor {
                             player.sendMessage(ChatColor.GRAY + "Submitted @ " + ChatColor.GREEN + ts);
                         }
                         return true;
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (info != null) {
+                            try {
+                                info.close();
+                            } catch (SQLException throwables) {
+                                throwables.printStackTrace();
+                            }
+                        }
+                        if (count != null) {
+                            try {
+                                count.close();
+                            } catch (SQLException throwables) {
+                                throwables.printStackTrace();
+                            }
+                        }
+                        try {
+                            CodingChallenge.connection.setAutoCommit(true);
+                        } catch (SQLException throwables) {
+                            throwables.printStackTrace();
+                        }
                     }
-                } catch (SQLException e) {
-                    e.printStackTrace();
                 }
             }
             return false;
