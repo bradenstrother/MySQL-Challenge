@@ -4,7 +4,7 @@ import java.sql.*;
 
 public abstract class Database {
     protected boolean connected = false;
-    protected Connection connection = null;
+    Connection connection = null;
     public int lastUpdate;
 
     protected Statements getStatement(String query) {

@@ -1,7 +1,6 @@
 package dev.baqel.codingchallenge.commands;
 
 import dev.baqel.codingchallenge.CodingChallenge;
-import dev.baqel.codingchallenge.DBConnection;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -14,9 +13,9 @@ import java.util.Arrays;
 
 public class SuggestCommand implements CommandExecutor {
     public CodingChallenge plugin;
-    ResultSet rs;
-    Connection con;
-    Statement stmt;
+//    ResultSet rs;
+//    Connection con;
+//    Statement stmt;
 
     public SuggestCommand(CodingChallenge plugin) {
         this.plugin = plugin;

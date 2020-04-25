@@ -1,6 +1,7 @@
 package dev.baqel.codingchallenge.commands;
 
 import dev.baqel.codingchallenge.CodingChallenge;
+import dev.baqel.codingchallenge.MySQLConnection;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -11,10 +12,7 @@ import org.bukkit.entity.Player;
 import java.sql.*;
 
 public class ViewCommand implements CommandExecutor {
-    public CodingChallenge plugin;
-    ResultSet rs;
-    Connection con;
-    Statement stmt;
+    private CodingChallenge plugin;
 
     public ViewCommand(CodingChallenge plugin) {
         this.plugin = plugin;
@@ -30,13 +28,13 @@ public class ViewCommand implements CommandExecutor {
                     return true;
                 } else if (args[0].length() == 36) { // UUID
                     try {
-                        ResultSet rs = this.con.preparedStatement("SELECT COUNT(UUID) FROM player_info WHERE UUID = '" + args[0] + "';").executeQuery();
+                        ResultSet rs = con.preparedStatement("SELECT COUNT(UUID) FROM player_info WHERE UUID = '" + args[0] + "';").executeQuery();
                         rs.next();
                         if (rs.getInt(1) == 0) {
                             player.sendMessage(ChatColor.RED + "Player UUID not found!");
                         } else {
                             player.sendMessage(ChatColor.GRAY + "Returning results for " + ChatColor.GREEN + args[0] + ChatColor.GRAY + ".");
-                            ResultSet rs1 = this.con.preparedStatement("SELECT * FROM player_info WHERE UUID = '" + args[0] + "';").executeQuery();
+                            ResultSet rs1 = con.preparedStatement("SELECT * FROM player_info WHERE UUID = '" + args[0] + "';").executeQuery();
                             int rows = 0;
                             rs1.last();
                             rows = rs1.getRow();
@@ -97,19 +95,22 @@ public class ViewCommand implements CommandExecutor {
 //                        }
 //                        return true;
                 else if (args.length == 1) { // View Suggestion by ID
-//                        PreparedStatement statement = this.con.prepareStatement("SELECT * FROM player_info WHERE ID = ?;");
-//                        statement.setInt(1, Integer.parseInt(args[0]));
-//                        statement.executeUpdate();
-                    try {
-                        this.con = this.plugin.mysql.getConnection();
-                        this.stmt = this.con.createStatement();
-                        this.rs = this.stmt.executeQuery("SELECT * FROM player_info WHERE ID = '" + Integer.parseInt(args[0]) + "';");
-                        this.rs.next();
+                    String query = "SELECT * FROM player_info WHERE ID = ?;";
+                    try (Connection con = plugin.mysql.getConnection();
+                         Statement stmt = con.createStatement();
+                         ResultSet rs = stmt.executeQuery(query)) {
+                        plugin.mysql.query(query);
+                        
+                        PreparedStatement statement = con.prepareStatement(query);
+                        statement.setInt(1, Integer.parseInt(args[0]));
+                        statement.executeUpdate();
 
-                        int id = this.rs.getInt("ID");
-                        String UUID = this.rs.getString("UUID");
-                        String Suggestion = this.rs.getString("MESSAGE");
-                        Timestamp ts = this.rs.getTimestamp("TIMESTAMP");
+                        rs.next();
+
+                        int id = rs.getInt("ID");
+                        String UUID = rs.getString("UUID");
+                        String Suggestion = rs.getString("MESSAGE");
+                        Timestamp ts = rs.getTimestamp("TIMESTAMP");
 
                         player.sendMessage(ChatColor.GRAY + "Suggestion Details");
                         player.sendMessage(ChatColor.GRAY + "ID: #" + ChatColor.GREEN + id);
@@ -118,7 +119,7 @@ public class ViewCommand implements CommandExecutor {
                         player.sendMessage(ChatColor.GRAY + "Submitted @ " + ChatColor.GREEN + ts);
                         return true;
                     } catch (SQLException e) {
-                        this.plugin.log.info(e.getMessage());
+                        plugin.log.info(e.getMessage());
                     }
                 }
             }

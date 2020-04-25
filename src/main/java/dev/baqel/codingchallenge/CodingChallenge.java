@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 public final class CodingChallenge extends JavaPlugin {
     public Logger log = Logger.getLogger("Minecraft");
-    DBConnection service = DBConnection.getInstance();
     public MySQLConnection mysql;
     public Connection con = null;
     public Statement stmt;
@@ -25,20 +24,20 @@ public final class CodingChallenge extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        this.getCommand("view").setExecutor(new ViewCommand(this));
-        this.getCommand("suggest").setExecutor(new SuggestCommand(this));
+        getCommand("view").setExecutor(new ViewCommand(this));
+        getCommand("suggest").setExecutor(new SuggestCommand(this));
 
         String hostname = "localhost";
-        String hostport = "3306";
+        String port = "3306";
         String database = "challenge_database";
         String user = "root";
         String password = "";
-        this.mysql = new MySQLConnection(hostname, hostport, database, user, password);
+        MySQLConnection mysql = new MySQLConnection(hostname, port, database, user, password);
         try {
-            this.mysql.open();
-            this.log.info("[CodingChallenge] Connected to MySQL Database");
+            mysql.open();
+            log.info("[CodingChallenge] Connected to MySQL Database");
         } catch (Exception e) {
-            this.log.info(e.getMessage());
+            log.info(e.getMessage());
         }
     }
 

@@ -3,11 +3,11 @@ package dev.baqel.codingchallenge;
 import java.sql.*;
 
 public class MySQLConnection extends Database {
-    private String hostname = "localhost";
-    private String portnmbr = "3306";
-    private String username = "root";
-    private String password = "";
-    private String database = "challenge_database";
+    private String hostname;
+    private String portnmbr;
+    private String username;
+    private String password;
+    private String database;
     private CodingChallenge plugin;
 
     public MySQLConnection(String hostname, String portnmbr, String database, String username, String password) {
@@ -19,11 +19,10 @@ public class MySQLConnection extends Database {
     }
 
     public void open() {
-        String url = "";
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            url = "jdbc:mysql://" + this.hostname + ":" + this.portnmbr + "/" + this.database;
-            this.connection = DriverManager.getConnection(url, this.username, this.password);
+            String url = "jdbc:mysql://" + hostname + ":" + portnmbr + "/" + database;
+            connection = DriverManager.getConnection(url, username, password);
         } catch (SQLException e) {
             System.out.print("Could not connect to MySQL server!");
         } catch (ClassNotFoundException e) {
@@ -33,8 +32,8 @@ public class MySQLConnection extends Database {
 
     public void close() {
         try {
-            if (this.connection != null) {
-                this.connection.close();
+            if (connection != null) {
+                connection.close();
             }
         }
         catch (Exception e) {
@@ -43,21 +42,21 @@ public class MySQLConnection extends Database {
     }
 
     public Connection getConnection() {
-        if (!this.checkConnection()) {
+        if (!checkConnection()) {
             try {
-                this.close();
-                this.open();
+                close();
+                open();
             }
             catch (Exception e) {
-                this.plugin.log.info("[CodingChallenge] Error: " + e);
+                plugin.log.info("[CodingChallenge] Error: " + e);
             }
         }
-        return this.connection;
+        return connection;
     }
 
     public boolean checkConnection() {
         try {
-            return this.connection != null && this.connection.isValid(2);
+            return connection != null && connection.isValid(2);
         }
         catch (SQLException e) {
             return false;
@@ -68,7 +67,7 @@ public class MySQLConnection extends Database {
         Statement statement = null;
         ResultSet result = null;
         try {
-            statement = this.connection.createStatement();
+            statement = connection.createStatement();
             result = statement.executeQuery(query);
             return result;
         }
